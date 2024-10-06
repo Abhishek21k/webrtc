@@ -9,40 +9,30 @@
   <body>
     <div class="container">
       <h1>WebRTC Video Connection</h1>
-
-      <div class="video-container">
-        <div class="video-wrapper">
-          <h2>Local Video</h2>
-          <video id="user-1" autoplay muted playsinline></video>
+      <div id="video">
+        <div class="video-container">
+          <p>You</p>
+          <video class="video-player" id="user-1" autoplay muted></video>
         </div>
-        <div class="video-wrapper">
-          <h2>Remote Video</h2>
-          <video id="user-2" autoplay playsinline></video>
+        <div class="video-container">
+          <p>Remote</p>
+          <video class="video-player" id="user-2" autoplay></video>
         </div>
       </div>
-
       <div class="controls">
-        <button id="create-offer">Create Offer</button>
-        <button id="create-answer">Create Answer</button>
-        <button id="add-answer">Add Answer</button>
-      </div>
-
-      <div>
-        <h2>Offer SDP</h2>
-        <textarea id="offer-sdp" placeholder="Offer SDP"></textarea>
-      </div>
-
-      <div>
-        <h2>Answer SDP</h2>
-        <textarea id="answer-sdp" placeholder="Answer SDP"></textarea>
-      </div>
-
-      <div>
-        <h2>ICE Candidates</h2>
-        <textarea id="ice-candidates" placeholder="ICE Candidates"></textarea>
+        <div class="control-group">
+          <button id="create-offer">Create Offer</button>
+          <label for="offer-sdp">SDP Offer</label>
+          <textarea id="offer-sdp"></textarea>
+        </div>
+        <div class="control-group">
+          <button id="create-answer">Create Answer</button>
+          <label for="answer-sdp">SDP Answer</label>
+          <textarea id="answer-sdp"></textarea>
+          <button id="add-answer">Add Answer</button>
+        </div>
       </div>
     </div>
-
     <script src="client.js"></script>
   </body>
 </html>
