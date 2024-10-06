@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebRTC Video Chat</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>WebRTC Video Chat</h1>
+      <div class="video-container">
+        <div class="video-wrapper">
+          <video id="localVideo" autoplay muted playsinline></video>
+          <p>You</p>
+        </div>
+        <div class="video-wrapper">
+          <video id="remoteVideo" autoplay playsinline></video>
+          <p>Remote User</p>
+        </div>
+      </div>
+      <div class="controls">
+        <button id="startButton">Start Call</button>
+        <button id="hangupButton">Hang Up</button>
+      </div>
+    </div>
+    <script src="client.js"></script>
+  </body>
+</html>
