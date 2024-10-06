@@ -3,27 +3,46 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WebRTC Video Chat</title>
+    <title>WebRTC Video Connection</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="container">
-      <h1>WebRTC Video Chat</h1>
+      <h1>WebRTC Video Connection</h1>
+
       <div class="video-container">
         <div class="video-wrapper">
-          <video id="localVideo" autoplay muted playsinline></video>
-          <p>You</p>
+          <h2>Local Video</h2>
+          <video id="user-1" autoplay muted playsinline></video>
         </div>
         <div class="video-wrapper">
-          <video id="remoteVideo" autoplay playsinline></video>
-          <p>Remote User</p>
+          <h2>Remote Video</h2>
+          <video id="user-2" autoplay playsinline></video>
         </div>
       </div>
+
       <div class="controls">
-        <button id="startButton">Start Call</button>
-        <button id="hangupButton">Hang Up</button>
+        <button id="create-offer">Create Offer</button>
+        <button id="create-answer">Create Answer</button>
+        <button id="add-answer">Add Answer</button>
+      </div>
+
+      <div>
+        <h2>Offer SDP</h2>
+        <textarea id="offer-sdp" placeholder="Offer SDP"></textarea>
+      </div>
+
+      <div>
+        <h2>Answer SDP</h2>
+        <textarea id="answer-sdp" placeholder="Answer SDP"></textarea>
+      </div>
+
+      <div>
+        <h2>ICE Candidates</h2>
+        <textarea id="ice-candidates" placeholder="ICE Candidates"></textarea>
       </div>
     </div>
+
     <script src="client.js"></script>
   </body>
 </html>

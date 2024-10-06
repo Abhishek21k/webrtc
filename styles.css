@@ -2,83 +2,89 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-}
+  }
 
-body {
+  body {
     font-family: Arial, sans-serif;
     line-height: 1.6;
-    padding: 20px;
+    color: #333;
     background-color: #f4f4f4;
-}
+    padding: 20px;
+  }
 
-.container {
+  .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
-}
+  }
 
-h1 {
+  h1 {
     text-align: center;
     margin-bottom: 20px;
-}
+    color: #2c3e50;
+  }
 
-.video-container {
+  h2 {
+    color: #34495e;
+    margin-bottom: 10px;
+  }
+
+  .video-container {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 20px;
-}
+    margin-bottom: 20px;
+  }
 
-.video-wrapper {
-    flex: 1 1 300px;
-    max-width: 500px;
-}
-
-video {
+  .video-wrapper {
     width: 100%;
-    height: auto;
-    border-radius: 10px;
+    max-width: 480px;
+  }
+
+  video {
+    width: 100%;
+    border: 2px solid #3498db;
+    border-radius: 8px;
     background-color: #000;
-}
+  }
 
-p {
-    text-align: center;
-    margin-top: 10px;
-}
-
-.controls {
+  .controls {
     display: flex;
-    justify-content: center;
-    margin-top: 20px;
+    flex-direction: column;
     gap: 10px;
-}
+    margin-bottom: 20px;
+  }
 
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    background-color: #4CAF50;
+  button {
+    padding: 10px 15px;
+    background-color: #3498db;
     color: white;
     border: none;
     border-radius: 5px;
-}
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
 
-button:hover {
-    background-color: #45a049;
-}
+  button:hover {
+    background-color: #2980b9;
+  }
 
-button:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-}
+  textarea {
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    border: 1px solid #bdc3c7;
+    border-radius: 5px;
+    resize: vertical;
+  }
 
-@media (max-width: 768px) {
-    .video-container {
-        flex-direction: column;
-        align-items: center;
+  @media (min-width: 768px) {
+    .controls {
+      flex-direction: row;
+      justify-content: center;
     }
 
-    .video-wrapper {
-        width: 100%;
+    textarea {
+      height: 150px;
     }
-}
+  }

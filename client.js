@@ -1,187 +1,100 @@
-const socket = new WebSocket('ws://' + window.location.host);
-
 let peerConnection;
 let localStream;
-const configuration = {
+let remoteStream;
+
+let servers = {
   iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun2.l.google.com:19302' },
-    { urls: 'stun:stun3.l.google.com:19302' },
-    { urls: 'stun:stun4.l.google.com:19302' },
     {
-      urls: 'turn:numb.viagenie.ca',
-      credential: 'muazkh',
-      username: 'webrtc@live.com'
+      urls: [
+        'stun:stun1.l.google.com:19302',
+        'stun:stun2.l.google.com:19302'
+      ]
     }
   ]
-};
-const localVideo = document.getElementById('localVideo');
-const remoteVideo = document.getElementById('remoteVideo');
-const startButton = document.getElementById('startButton');
-
-startButton.onclick = startCall;
-
-socket.onmessage = async function (event) {
-  const message = JSON.parse(event.data);
-  switch (message.type) {
-    case 'offer':
-      handleOffer(message.offer);
-      break;
-    case 'answer':
-      handleAnswer(message.answer);
-      break;
-    case 'candidate':
-      handleCandidate(message.candidate);
-      break;
-  }
-};
-
-socket.onerror = function (error) {
-  console.error('WebSocket Error:', error);
-};
-
-socket.onclose = function (event) {
-  console.log('WebSocket connection closed:', event.code, event.reason);
-};
-
-async function startCall() {
-  try {
-    const constraints = {
-      video: {
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
-        facingMode: 'user'
-      },
-      audio: true
-    };
-
-    localStream = await navigator.mediaDevices.getUserMedia(constraints);
-    localVideo.srcObject = localStream;
-
-    createPeerConnection();
-
-    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
-    const offer = await peerConnection.createOffer();
-    await peerConnection.setLocalDescription(offer);
-    socket.send(JSON.stringify({ type: 'offer', offer: offer }));
-
-    document.getElementById('startButton').disabled = true;
-    document.getElementById('hangupButton').disabled = false;
-
-    // Set a timeout to check if the connection is established
-    setTimeout(() => {
-      if (peerConnection.iceConnectionState !== 'connected' && peerConnection.iceConnectionState !== 'completed') {
-        console.error('Connection failed to establish within the timeout period');
-        hangUp();
-      }
-    }, 10000); // 10 seconds timeout
-
-  } catch (error) {
-    console.error('Error starting call:', error);
-  }
 }
 
-function hangUp() {
-  if (peerConnection) {
-    peerConnection.close();
-  }
-  if (localStream) {
-    localStream.getTracks().forEach(track => track.stop());
-  }
-  localVideo.srcObject = null;
-  remoteVideo.srcObject = null;
-  document.getElementById('startButton').disabled = false;
-  document.getElementById('hangupButton').disabled = true;
+// Uncomment and fill in your TURN server details if needed
+// servers.iceServers.push({
+//     urls: 'turn:your-turn-server.com:3478',
+//     username: 'your-username',
+//     credential: 'your-password'
+// });
+
+let init = async () => {
+  localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+  document.getElementById('user-1').srcObject = localStream
 }
 
-document.getElementById('startButton').addEventListener('click', startCall);
-document.getElementById('hangupButton').addEventListener('click', hangUp);
+let createPeerConnection = async () => {
+  peerConnection = new RTCPeerConnection(servers)
 
-// Add this to handle orientation changes
-window.addEventListener('orientationchange', function () {
-  // Give the DOM time to update
-  setTimeout(function () {
-    if (localVideo.srcObject) {
-      const videoTrack = localVideo.srcObject.getVideoTracks()[0];
-      if (videoTrack) {
-        videoTrack.applyConstraints({
-          width: { ideal: window.innerWidth },
-          height: { ideal: window.innerHeight }
-        });
-      }
-    }
-  }, 200);
-});
+  remoteStream = new MediaStream()
+  document.getElementById('user-2').srcObject = remoteStream
 
-function createPeerConnection() {
-  peerConnection = new RTCPeerConnection(configuration);
+  localStream.getTracks().forEach((track) => {
+    peerConnection.addTrack(track, localStream)
+  })
 
-  peerConnection.ontrack = function (event) {
-    console.log('Received remote track');
-    remoteVideo.srcObject = event.streams[0];
-  };
+  peerConnection.ontrack = async (event) => {
+    event.streams[0].getTracks().forEach((track) => {
+      remoteStream.addTrack(track)
+    })
+  }
 
-  peerConnection.onicecandidate = function (event) {
+  peerConnection.onicecandidate = async (event) => {
     if (event.candidate) {
-      console.log('New ICE candidate:', event.candidate);
-      socket.send(JSON.stringify({ type: 'candidate', candidate: event.candidate }));
-    } else {
-      console.log('ICE candidate gathering completed');
+      document.getElementById('offer-sdp').value = JSON.stringify(peerConnection.localDescription)
+      document.getElementById('ice-candidates').value += JSON.stringify(event.candidate) + '\n'
     }
-  };
-
-  peerConnection.oniceconnectionstatechange = function () {
-    console.log('ICE connection state change:', peerConnection.iceConnectionState);
-  };
-
-  peerConnection.onicegatheringstatechange = function () {
-    console.log('ICE gathering state change:', peerConnection.iceGatheringState);
-  };
-
-  peerConnection.onsignalingstatechange = function () {
-    console.log('Signaling state change:', peerConnection.signalingState);
-  };
-
-  peerConnection.onconnectionstatechange = function () {
-    console.log('Connection state change:', peerConnection.connectionState);
-  };
-}
-
-async function handleOffer(offer) {
-  try {
-    if (!peerConnection) {
-      createPeerConnection();
-    }
-
-    if (!localStream) {
-      localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      localVideo.srcObject = localStream;
-      localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-    }
-
-    await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-    const answer = await peerConnection.createAnswer();
-    await peerConnection.setLocalDescription(answer);
-    socket.send(JSON.stringify({ type: 'answer', answer: answer }));
-  } catch (error) {
-    console.error('Error handling offer:', error);
   }
 }
 
-async function handleAnswer(answer) {
-  try {
-    await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-  } catch (error) {
-    console.error('Error handling answer:', error);
+let createOffer = async () => {
+  createPeerConnection()
+
+  let offer = await peerConnection.createOffer()
+  await peerConnection.setLocalDescription(offer)
+
+  document.getElementById('offer-sdp').value = JSON.stringify(offer)
+}
+
+let createAnswer = async () => {
+  let offer = document.getElementById('offer-sdp').value
+  if (!offer) return alert('Retrieve offer from peer first...')
+
+  createPeerConnection()
+
+  offer = JSON.parse(offer)
+  await peerConnection.setRemoteDescription(offer)
+
+  let answer = await peerConnection.createAnswer()
+  await peerConnection.setLocalDescription(answer)
+
+  document.getElementById('answer-sdp').value = JSON.stringify(answer)
+}
+
+let addAnswer = async () => {
+  let answer = document.getElementById('answer-sdp').value
+  if (!answer) return alert('Retrieve answer from peer first...')
+
+  answer = JSON.parse(answer)
+
+  if (!peerConnection.currentRemoteDescription) {
+    await peerConnection.setRemoteDescription(answer)
+  }
+
+  // Add ICE candidates after setting remote description
+  let iceCandidates = document.getElementById('ice-candidates').value.split('\n')
+  for (let iceCandidate of iceCandidates) {
+    if (iceCandidate) {
+      let candidate = JSON.parse(iceCandidate)
+      await peerConnection.addIceCandidate(candidate)
+    }
   }
 }
 
-async function handleCandidate(candidate) {
-  try {
-    await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-  } catch (error) {
-    console.error('Error handling ICE candidate:', error);
-  }
-}
+init()
+
+document.getElementById('create-offer').addEventListener('click', createOffer)
+document.getElementById('create-answer').addEventListener('click', createAnswer)
+document.getElementById('add-answer').addEventListener('click', addAnswer)
