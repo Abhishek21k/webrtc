@@ -37,23 +37,43 @@ const server = http.createServer((req, res) => {
 });
 
 const wss = new WebSocket.Server({ server });
+const clients = new Map();
 
 wss.on('connection', (ws) => {
   console.log('New WebSocket connection established');
 
-  ws.on('message', (message) => {
-    console.log('Received message:', message.toString());
+  const clientId = Math.random().toString(36).substr(2, 9);
+  clients.set(clientId, ws);
 
-    // Broadcast the message to all clients except the sender
-    wss.clients.forEach((client) => {
-      if (client !== ws && client.readyState === WebSocket.OPEN) {
-        client.send(message.toString());
-      }
-    });
+  ws.send(JSON.stringify({ type: 'client-id', clientId }));
+
+  ws.on('message', (message) => {
+    const data = JSON.parse(message);
+    console.log('Received message:', data);
+
+    switch (data.type) {
+      case 'offer':
+      case 'answer':
+      case 'ice-candidate':
+        console.log(`Received ${data.type}`);
+        const targetClient = clients.get(data.target);
+        if (targetClient) {
+          targetClient.send(JSON.stringify({
+            type: data.type,
+            data: data.data,
+            source: clientId
+          }));
+        }
+        break;
+      default:
+        console.error('Unrecognized message', data);
+    };
+
   });
 
   ws.on('close', () => {
     console.log('WebSocket connection closed');
+    clients.delete(ws);
   });
 
   ws.on('error', (error) => {

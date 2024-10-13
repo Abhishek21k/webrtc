@@ -3,36 +3,47 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="WebRTC Video Connection Application" />
     <title>WebRTC Video Connection</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
   </head>
   <body>
     <div class="container">
       <h1>WebRTC Video Connection</h1>
+      <div id="user-id-container">
+        <span>Your ID: </span>
+        <span id="user-id">Waiting for ID...</span>
+        <button id="copy-id">Copy ID</button>
+      </div>
       <div id="video">
         <div class="video-container">
           <p>You</p>
-          <video class="video-player" id="user-1" autoplay muted></video>
+          <video
+            class="video-player"
+            id="user-1"
+            autoplay
+            playsinline
+            muted
+          ></video>
         </div>
         <div class="video-container">
           <p>Remote</p>
-          <video class="video-player" id="user-2" autoplay></video>
+          <video class="video-player" id="user-2" autoplay playsinline></video>
         </div>
       </div>
       <div class="controls">
         <div class="control-group">
-          <button id="create-offer">Create Offer</button>
-          <label for="offer-sdp">SDP Offer</label>
-          <textarea id="offer-sdp"></textarea>
+          <button id="create-offer">Start Call</button>
+          <button id="end-call" disabled>End Call</button>
         </div>
-        <div class="control-group">
-          <button id="create-answer">Create Answer</button>
-          <label for="answer-sdp">SDP Answer</label>
-          <textarea id="answer-sdp"></textarea>
-          <button id="add-answer">Add Answer</button>
-        </div>
+        <!-- <div class="control-group">
+          <button id="toggle-audio">Mute Audio</button>
+          <button id="toggle-video">Stop Video</button>
+        </div> -->
       </div>
+      <div id="connection-status">Not connected</div>
     </div>
-    <script src="client.js"></script>
+    <script src="client.js" defer></script>
   </body>
 </html>
